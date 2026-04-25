@@ -1,0 +1,18 @@
+{
+  "name": "casper-node",
+  "version": "0.1.0",
+  "description": "Termux-first orchestrator bridge to Python CLI",
+  "private": true,
+  "main": "index.js",
+  "bin": {
+    "casper-node": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js --help",
+    "build": "node index.js build local",
+    "test": "node -e \"console.log('No Node tests defined; use pytest for Python modules.')\""
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
