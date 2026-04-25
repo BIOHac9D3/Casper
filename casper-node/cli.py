@@ -1,11 +1,33 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Optional
 
-import typer
-from dotenv import load_dotenv
-from rich import print
+
+def _fallback_help() -> None:
+    print("Casper Node CLI")
+    print("\nDependencies are not installed. Install them with:")
+    print("  python -m pip install -r requirements.txt")
+    print("\nCommands:")
+    print("  generate <prompt> [--provider openai|claude]")
+    print("  build <target>")
+    print("  deploy <target> [-m|--message <msg>]")
+
+
+try:
+    import typer
+    from dotenv import load_dotenv
+    from rich import print
+except ModuleNotFoundError:
+    if __name__ == "__main__":
+        wants_help = any(arg in {"--help", "-h", "help"} for arg in sys.argv[1:])
+        if wants_help:
+            _fallback_help()
+            raise SystemExit(0)
+        print("Missing CLI dependencies. Run: python -m pip install -r requirements.txt")
+        raise SystemExit(1)
+    raise
 
 from agents.claude_agent import ClaudeAgent
 from agents.openai_agent import OpenAIAgent

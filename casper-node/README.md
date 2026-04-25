@@ -17,7 +17,21 @@ A mobile-first orchestration toolkit for Termux-driven workflows, remote AI agen
 python -m pip install -r requirements.txt
 cp .env.example .env
 python cli.py --help
+node index.js --help
 ```
+
+
+## Termux / Node Entry Point
+
+If you prefer invoking from Node in Termux:
+
+```bash
+node index.js --help
+node index.js generate "Draft release notes"
+node index.js build local
+```
+
+`index.js` forwards all arguments to `python3 cli.py` and keeps output streaming to your shell.
 
 ## Environment Variables
 

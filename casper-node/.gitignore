@@ -4,3 +4,4 @@ __pycache__/
 .env
 memory/
 .pytest_cache/
+node_modules/
