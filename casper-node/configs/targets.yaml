@@ -1,0 +1,10 @@
+targets:
+  local:
+    path: .
+    type: python
+  staging:
+    path: /var/www/casper-staging
+    type: node
+  production:
+    path: /srv/casper-prod
+    type: docker
