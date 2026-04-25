@@ -3,9 +3,10 @@ from __future__ import annotations
 import os
 from typing import Any, Dict, Optional
 
-import requests
-
 from agents.base import BaseAgent
+
+PULL_TIMEOUT_SECONDS = 600
+GENERATE_TIMEOUT_SECONDS = 180
 
 
 class LocalAgent(BaseAgent):
@@ -20,17 +21,17 @@ class LocalAgent(BaseAgent):
         endpoint = f"{self.host}/api/pull"
         payload = {"name": selected_model, "stream": False}
 
-        response = requests.post(endpoint, json=payload, timeout=600)
-        if response.status_code >= 400:
-            return {
-                "status": "error",
-                "provider": "local",
-                "model": selected_model,
-                "message": f"HTTP {response.status_code}",
-                "details": response.text,
-            }
+        data, error = self._post_json(
+            endpoint,
+            provider="local",
+            payload=payload,
+            timeout=PULL_TIMEOUT_SECONDS,
+            model=selected_model,
+        )
+        if error is not None:
+            return dict(error)
 
-        data = response.json()
+        assert data is not None
         return {
             "status": "ok",
             "provider": "local",
@@ -48,17 +49,17 @@ class LocalAgent(BaseAgent):
             "stream": False,
         }
 
-        response = requests.post(endpoint, json=payload, timeout=180)
-        if response.status_code >= 400:
-            return {
-                "status": "error",
-                "provider": "local",
-                "model": selected_model,
-                "message": f"HTTP {response.status_code}",
-                "details": response.text,
-            }
+        data, error = self._post_json(
+            endpoint,
+            provider="local",
+            payload=payload,
+            timeout=GENERATE_TIMEOUT_SECONDS,
+            model=selected_model,
+        )
+        if error is not None:
+            return dict(error)
 
-        data = response.json()
+        assert data is not None
         return {
             "status": "ok",
             "provider": "local",
