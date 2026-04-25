@@ -33,6 +33,55 @@ node index.js build local
 
 `index.js` forwards all arguments to `python3 cli.py` and keeps output streaming to your shell.
 
+## Full Termux Install + Run
+
+### 1) One-shot installer script
+
+```bash
+bash scripts/termux_install_run.sh <repo_url> <install_dir>
+```
+
+Examples:
+
+```bash
+bash scripts/termux_install_run.sh https://github.com/your-org/casper-node.git ~/Casper/casper-node
+bash scripts/termux_install_run.sh
+```
+
+### 2) Manual install in Termux
+
+```bash
+pkg update -y
+pkg upgrade -y
+pkg install -y git python nodejs openssh
+
+git clone https://github.com/your-org/casper-node.git ~/Casper/casper-node
+cd ~/Casper/casper-node
+
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+npm install --no-audit --no-fund
+
+cp .env.example .env
+# edit .env and add API keys
+```
+
+### 3) Run in Termux
+
+```bash
+cd ~/Casper/casper-node
+source .venv/bin/activate
+
+python cli.py --help
+node index.js --help
+
+python cli.py generate "Create a release checklist" --provider openai
+python cli.py build local
+python cli.py deploy production -m "Deploy from Termux"
+```
+
 ## Environment Variables
 
 - `OPENAI_API_KEY`
