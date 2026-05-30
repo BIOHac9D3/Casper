@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  casper-node:
+    build: .
+    container_name: casper-node
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./casper-node:/app/casper-node
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
