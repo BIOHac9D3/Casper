@@ -1,0 +1,19 @@
+workflows:
+  - id: simple_workflow
+    name: Simple Workflow
+    description: A simple example workflow
+    domain: automation
+    version: 1.0.0
+    enabled: true
+    steps:
+      - id: step1
+        skill_id: skill1
+        position: 0
+        required: true
+      - id: step2
+        skill_id: skill2
+        position: 1
+        required: true
+        depends_on:
+          - step1
+    retry_policy: fail_on_error
