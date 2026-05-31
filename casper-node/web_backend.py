@@ -11,6 +11,7 @@ from core.registry.skills import SkillRegistry
 from core.parsers.codex_parser import CodexParser
 from agents.skill_adapter import SkillAgent
 from integrations.skills_web import router as advanced_skills_router
+from integrations.workflows_web import router as workflows_router
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -31,8 +32,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include advanced skills router
+# Include routers
 app.include_router(advanced_skills_router)
+app.include_router(workflows_router)
 
 # Initialize skill registry
 skill_registry = SkillRegistry()
