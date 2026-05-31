@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field
 
 
 class SkillDomain(str, Enum):
-    """Domains/categories for skills."""
     WEB = "web"
     DATA = "data"
     AUTOMATION = "automation"
@@ -18,7 +17,6 @@ class SkillDomain(str, Enum):
 
 
 class InputType(str, Enum):
-    """Types of skill inputs."""
     STRING = "string"
     LIST = "list"
     FILE = "file"
@@ -27,13 +25,11 @@ class InputType(str, Enum):
 
 
 class SkillTrigger(BaseModel):
-    """A trigger phrase that activates a skill."""
     phrase: str = Field(..., description="The trigger phrase to match against user prompts")
     weight: float = Field(default=1.0, ge=0.0, description="Matching weight for this trigger")
 
 
 class SkillInput(BaseModel):
-    """Definition of an input parameter for a skill."""
     name: str = Field(..., description="Unique name of the input parameter")
     type: InputType = Field(..., description="Type of the input")
     prompt: str = Field(..., description="User-friendly prompt for this input")
@@ -42,8 +38,13 @@ class SkillInput(BaseModel):
     options: Optional[List[str]] = Field(default=None, description="Allowed values for list type inputs")
 
 
+class SkillDependency(BaseModel):
+    skill_id: str = Field(..., description="ID of the skill this skill depends on")
+    version: Optional[str] = Field(default=None, description="Required version of the dependency")
+    optional: bool = Field(default=False, description="Whether this dependency is optional")
+
+
 class Skill(BaseModel):
-    """Definition of a skill."""
     id: str = Field(..., description="Unique identifier for the skill")
     name: str = Field(..., description="Human-readable name of the skill")
     domain: SkillDomain = Field(..., description="Category/domain of the skill")
@@ -56,7 +57,12 @@ class Skill(BaseModel):
     version: str = Field(default="1.0.0", description="Version of the skill")
     author: Optional[str] = Field(default=None, description="Author of the skill")
     tags: List[str] = Field(default_factory=list, description="Tags for categorization and filtering")
-    
+    dependencies: List[SkillDependency] = Field(default_factory=list, description="Skills that this skill depends on")
+    chainable: bool = Field(default=False, description="Whether this skill can be used in a chain/workflow")
+    output_schema: Optional[Dict[str, Any]] = Field(default=None, description="Schema for the skill's output for chaining")
+    timeout: Optional[int] = Field(default=None, description="Maximum execution time in seconds")
+    retry_count: int = Field(default=0, ge=0, description="Number of retries on failure")
+
     class Config:
         use_enum_values = True
         json_schema_extra = {
@@ -70,14 +76,15 @@ class Skill(BaseModel):
                     "inputs": [{"name": "app_name", "type": "string", "prompt": "Enter app name", "required": True}],
                     "disallowed": ["illegal", "fraud"],
                     "enabled": True,
-                    "priority": 10
+                    "priority": 10,
+                    "version": "1.0.0",
+                    "chainable": True,
+                    "output_schema": {"result": "string"}
                 }
             ]
         }
 
-
     def to_dict(self) -> Dict[str, Any]:
-        """Convert skill to dictionary, handling enums properly."""
         return {
             "id": self.id,
             "name": self.name,
@@ -100,21 +107,16 @@ class Skill(BaseModel):
             "priority": self.priority,
             "version": self.version,
             "author": self.author,
-            "tags": self.tags
+            "tags": self.tags,
+            "dependencies": [{"skill_id": d.skill_id, "version": d.version, "optional": d.optional} for d in self.dependencies],
+            "chainable": self.chainable,
+            "output_schema": self.output_schema,
+            "timeout": self.timeout,
+            "retry_count": self.retry_count
         }
-    
+
     @classmethod
     def from_codex_config(cls, skill_id: str, config: Dict[str, Any]) -> Skill:
-        """
-        Create a Skill from Codex-style configuration dictionary.
-        
-        Args:
-            skill_id: The skill identifier
-            config: Codex-style configuration dictionary
-            
-        Returns:
-            Skill: A new Skill instance
-        """
         inputs = []
         for input_config in config.get("inputs", []):
             input_type = input_config.get("type", "string")
@@ -126,17 +128,25 @@ class Skill(BaseModel):
                 default=input_config.get("default"),
                 options=input_config.get("options")
             ))
-        
+
         triggers = []
         for trigger_phrase in config.get("triggers", []):
             triggers.append(SkillTrigger(phrase=trigger_phrase))
-        
+
         domain = config.get("domain", "other")
         try:
             domain_enum = SkillDomain(domain)
         except ValueError:
             domain_enum = SkillDomain.OTHER
-        
+
+        dependencies = []
+        for dep_config in config.get("dependencies", []):
+            dependencies.append(SkillDependency(
+                skill_id=dep_config.get("skill_id", ""),
+                version=dep_config.get("version"),
+                optional=dep_config.get("optional", False)
+            ))
+
         return cls(
             id=skill_id,
             name=config.get("name", skill_id),
@@ -147,5 +157,11 @@ class Skill(BaseModel):
             disallowed=config.get("disallowed", []),
             enabled=True,
             priority=0,
-            tags=config.get("tags", [])
+            version=config.get("version", "1.0.0"),
+            tags=config.get("tags", []),
+            dependencies=dependencies,
+            chainable=config.get("chainable", False),
+            output_schema=config.get("output_schema"),
+            timeout=config.get("timeout"),
+            retry_count=config.get("retry_count", 0)
         )
