@@ -15,6 +15,13 @@ def _fallback_help() -> None:
     print("  pull-model [--model <model_id>]")
     print("  build <target>")
     print("  deploy <target> [-m|--message <msg>]")
+    print("  advanced-skills discover [--domain DOMAIN]")
+    print("  advanced-skills search QUERY")
+    print("  workflows list [--domain DOMAIN] [--tag TAG]")
+    print("  workflows run <workflow_id> [--inputs FILE]")
+    print("  workflows show <workflow_id>")
+    print("  workflows enable <workflow_id>")
+    print("  workflows disable <workflow_id>")
 
 
 try:
@@ -38,6 +45,8 @@ from core.config import load_targets
 from core.memory import MemoryStore
 from pipelines.build import run_build
 from pipelines.deploy import run_deploy
+from cli_advanced_skills import app as advanced_skills_app
+from cli_workflows import app as workflows_app
 
 app = typer.Typer(help="Casper Node: mobile-first AI + CI/CD orchestrator")
 
@@ -164,6 +173,13 @@ def deploy(
     print(result)
     if result["status"] != "ok":
         raise RuntimeError(result["message"])
+
+
+# Add advanced skills subcommand
+app.add_typer(advanced_skills_app, name="advanced-skills", help="Advanced skill management commands")
+
+# Add workflows subcommand
+app.add_typer(workflows_app, name="workflows", help="Workflow and skill chaining commands")
 
 
 if __name__ == "__main__":
