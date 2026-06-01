@@ -3,9 +3,10 @@ from __future__ import annotations
 import os
 from typing import Any, Dict, Optional
 
-import requests
-
 from agents.base import BaseAgent
+
+REQUEST_TIMEOUT_SECONDS = int(os.getenv("CASPER_HTTP_TIMEOUT", "60"))
+TEMPERATURE = 0.2
 
 
 class OpenAIAgent(BaseAgent):
@@ -23,23 +24,24 @@ class OpenAIAgent(BaseAgent):
         payload = {
             "model": selected_model,
             "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.2,
+            "temperature": TEMPERATURE,
         }
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
 
-        response = requests.post(self.endpoint, json=payload, headers=headers, timeout=60)
-        if response.status_code >= 400:
-            return {
-                "status": "error",
-                "provider": "openai",
-                "message": f"HTTP {response.status_code}",
-                "details": response.text,
-            }
+        data, error = self._post_json(
+            self.endpoint,
+            provider="openai",
+            payload=payload,
+            headers=headers,
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+        if error is not None:
+            return dict(error)
 
-        data = response.json()
+        assert data is not None
         content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
         return {
             "status": "ok",

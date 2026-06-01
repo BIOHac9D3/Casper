@@ -88,17 +88,24 @@ python cli.py deploy production -m "Deploy from Termux"
 - `OPENAI_MODEL` (default `gpt-4o-mini`)
 - `ANTHROPIC_API_KEY`
 - `ANTHROPIC_MODEL` (default `claude-3-5-sonnet-20241022`)
+- `OLLAMA_HOST` (default `http://127.0.0.1:11434`)
+- `LOCAL_MODEL` (default `llama3.2:3b`)
+- `CASPER_HTTP_TIMEOUT` (default `60`, seconds — applies to OpenAI and Claude requests)
 
 ## Usage
 
 ```bash
+python cli.py --version
+python cli.py list-targets
 python cli.py generate "Create a release checklist"
 python cli.py generate "Summarize latest commit" --provider claude
 python cli.py generate "Plan roadmap" --provider openai --model gpt-4.1-mini
 python cli.py pull-model --model llama3.2:3b
 python cli.py generate "Summarize logs" --provider local --model llama3.2:3b --auto-pull
 python cli.py build local
+python cli.py build local --dry-run
 python cli.py deploy production -m "Deploy production release"
+python cli.py deploy production --dry-run -m "Preview"
 ```
 
 
@@ -139,6 +146,11 @@ Edit `configs/targets.yaml` to define deploy targets:
 
 - `path`: project root or remote path
 - `type`: one of `docker`, `node`, `python`
+- `branch` *(optional)*: git branch pushed during `deploy`. Defaults to `main`.
+
+Use `python cli.py list-targets` to print the configured targets as a table.
+Pass `--dry-run` to `build` or `deploy` to preview the steps without
+executing them.
 
 ## CI/CD
 

@@ -6,7 +6,6 @@ from typing import Dict, Any
 import yaml
 
 
-
 def load_targets(path: Path) -> Dict[str, Dict[str, Any]]:
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {path}")

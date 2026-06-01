@@ -2,9 +2,12 @@ targets:
   local:
     path: .
     type: python
+    # branch: main
   staging:
     path: /var/www/casper-staging
     type: node
+    # branch: main
   production:
     path: /srv/casper-prod
     type: docker
+    # branch: main

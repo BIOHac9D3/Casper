@@ -15,13 +15,13 @@ class MemoryStore:
         self.sessions_dir.mkdir(parents=True, exist_ok=True)
 
     def log_event(self, event_type: str, payload: Dict[str, Any]) -> Path:
-        ts = datetime.now(timezone.utc).strftime("%Y%m%d")
+        now = datetime.now(timezone.utc)
         entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": now.isoformat(),
             "event": event_type,
             "payload": payload,
         }
-        file_path = self.logs_dir / f"{ts}.log"
+        file_path = self.logs_dir / f"{now.strftime('%Y%m%d')}.log"
         with file_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(entry) + "\n")
         return file_path

@@ -3,9 +3,11 @@ from __future__ import annotations
 import os
 from typing import Any, Dict, Optional
 
-import requests
-
 from agents.base import BaseAgent
+
+MAX_TOKENS = 800
+REQUEST_TIMEOUT_SECONDS = int(os.getenv("CASPER_HTTP_TIMEOUT", "60"))
+ANTHROPIC_VERSION = "2023-06-01"
 
 
 class ClaudeAgent(BaseAgent):
@@ -26,25 +28,26 @@ class ClaudeAgent(BaseAgent):
         selected_model = model or self.model
         payload = {
             "model": selected_model,
-            "max_tokens": 800,
+            "max_tokens": MAX_TOKENS,
             "messages": [{"role": "user", "content": prompt}],
         }
         headers = {
             "x-api-key": self.api_key,
-            "anthropic-version": "2023-06-01",
+            "anthropic-version": ANTHROPIC_VERSION,
             "content-type": "application/json",
         }
 
-        response = requests.post(self.endpoint, json=payload, headers=headers, timeout=60)
-        if response.status_code >= 400:
-            return {
-                "status": "error",
-                "provider": "claude",
-                "message": f"HTTP {response.status_code}",
-                "details": response.text,
-            }
+        data, error = self._post_json(
+            self.endpoint,
+            provider="claude",
+            payload=payload,
+            headers=headers,
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+        if error is not None:
+            return dict(error)
 
-        data = response.json()
+        assert data is not None
         blocks = data.get("content", [])
         text = "\n".join(block.get("text", "") for block in blocks if block.get("type") == "text")
         return {
