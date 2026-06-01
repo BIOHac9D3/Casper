@@ -26,8 +26,7 @@ class InputCollector:
         return collected
 
     def _prompt_user(self, input_spec: SkillInput) -> Any:
-        print(f"
-{input_spec.prompt}")
+        print(f"Input: {input_spec.prompt}")
         if input_spec.options:
             print(f"Options: {', '.join(input_spec.options)}")
             for i, option in enumerate(input_spec.options, 1):
@@ -99,9 +98,8 @@ class SkillAgent(BaseAgent):
         return self._post_process_result(result, skill, inputs)
 
     def _get_skill_prompt_template(self, skill: Skill) -> str:
-        input_descriptions = "
-".join(f"- {i.name}: {i.prompt}" for i in skill.inputs)
-        return f"You are an expert assistant specialized in {skill.domain.value}.
+        input_descriptions = "\n".join(f"- {i.name}: {i.prompt}" for i in skill.inputs)
+        return f"""You are an expert assistant specialized in {skill.domain.value}.
 Your task: {skill.name}
 
 {skill.description}
@@ -110,7 +108,7 @@ Input parameters:
 {input_descriptions}
 
 Please provide a comprehensive response based on the inputs provided.
-"
+"""
 
     def _post_process_result(self, result: Dict[str, Any], skill: Skill, inputs: Dict[str, Any]) -> Dict[str, Any]:
         result["skill"] = {"id": skill.id, "name": skill.name, "domain": skill.domain.value}
