@@ -1,0 +1,23 @@
+{
+  "sentry": {
+    "dsn": "SENTRY_DSN_PLACEHOLDER",
+    "traces_sample_rate": 0.1,
+    "environment": "production",
+    "release": "casper@1.0.0",
+    "send_default_pii": false,
+    "shutdown_timeout": 5,
+    "debug": false
+  },
+  "logging": {
+    "enabled": true,
+    "level": "ERROR"
+  },
+  "integrations": {
+    "fastapi": {
+      "enabled": true
+    },
+    "requests": {
+      "enabled": true
+    }
+  }
+}
