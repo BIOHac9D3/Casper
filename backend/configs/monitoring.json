@@ -1,0 +1,31 @@
+{
+  "metrics": {
+    "enabled": true,
+    "port": 9000,
+    "prefix": "casper_backend",
+    "endpoints": ["/health", "/agents", "/workflows"]
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json",
+    "outputs": ["stdout", "file"],
+    "file": {
+      "path": "/var/log/casper/backend.log",
+      "max_size": "10MB",
+      "max_files": 5
+    }
+  },
+  "tracing": {
+    "enabled": true,
+    "jaeger": {
+      "host": "jaeger",
+      "port": 6831
+    }
+  },
+  "sentry": {
+    "enabled": false,
+    "dsn": "SENTRY_DSN_PLACEHOLDER",
+    "traces_sample_rate": 0.1,
+    "environment": "development"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Casper Backend Overview",
+    "tags": ["casper", "backend"],
+    "timezone": "browser"
+  },
+  "overwrite": true,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Request Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(http_requests_total[1m])",
+          "legendFormat": "method_path"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Error Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{status=~"5.."}[1m]) / rate(http_requests_total[1m])",
+          "legendFormat": "Error Rate"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "AI API Latency",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(ai_api_latency_seconds_bucket[1m])) by (le, provider))",
+          "legendFormat": "provider_p95"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": []
+  }
+}
